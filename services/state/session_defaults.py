@@ -14,6 +14,8 @@ def initial_session_defaults():
         "last_saved_sets_completed": 0,
         "set_cycle_started_at": 0.0,
         "last_exercise_type": "Squats",
+        "camera_live": False,
+        "pose_detected": True,
 
         # Workout plan (set before starting)
         "workout_started": False,

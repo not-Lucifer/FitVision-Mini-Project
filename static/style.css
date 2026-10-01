@@ -1,23 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&display=swap');
+
 /* =========================================================
-   GLOBAL THEME
+   TOKENS
+   Gym rubber and chalk, plus competition plate colours.
+   Plate colours only ever mean form status or set progress.
 ========================================================= */
+
+:root {
+  --rubber: #23262A;
+  --rubber-raised: #2E3236;
+  --chalk: #ECEAE4;
+  --chalk-muted: #A9ADB1;
+  --line: rgba(236, 234, 228, 0.12);
+  --ring: #7A7F85;
+
+  --plate-green: #1E8F4E;
+  --plate-blue: #4C82DB;
+
+  --good: #5CC98A;
+  --warn: #F2B705;
+  --bad: #FF7A7A;
+
+  --font-count: 'Big Shoulders Display', 'Arial Narrow', sans-serif;
+}
 
 .stApp {
-  background-color: #0A0D14;
-  color: #fff;
-}
-
-[data-testid="stSidebar"] {
-  background-color: #111520;
-}
-
-/* =========================================================
-   TYPOGRAPHY (SCOPED – safer)
-========================================================= */
-
-.block-container,
-.block-container * {
-  font-family: 'AdobeClean', sans-serif !important;
+  background-color: var(--rubber);
+  color: var(--chalk);
 }
 
 /* =========================================================
@@ -25,157 +34,347 @@
 ========================================================= */
 
 .block-container {
-  padding: 50px 3rem !important;
-  max-width: 750px !important;
+  max-width: 1180px !important;
+  padding: 2.5rem 2.5rem 4rem !important;
+}
+
+h1 {
+  font-size: 2.25rem !important;
+  letter-spacing: -0.01em;
+}
+
+[data-testid="stSidebar"] h1 {
+  font-size: 1.4rem !important;
+  padding-bottom: 0.25rem !important;
+}
+
+.app-subtitle {
+  color: var(--chalk-muted);
+  font-size: 1.05rem;
+  margin: -0.5rem 0 1.75rem;
+  max-width: 60ch;
 }
 
 /* =========================================================
-   BUTTONS
+   CONTROLS
 ========================================================= */
 
-button,
-.stButton button,
-.stDownloadButton button,
-.MuiBox-root button {
-  background-color: #181D2A !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  border-radius: 0 !important;
-  font-family: 'AdobeClean', sans-serif !important;
+[data-testid="stBaseButton-primary"],
+[data-testid="stBaseButton-primaryFormSubmit"] {
+  background-color: var(--chalk) !important;
+  border-color: var(--chalk) !important;
+  color: var(--rubber) !important;
+  font-weight: 700;
+}
+
+[data-testid="stBaseButton-primary"]:hover,
+[data-testid="stBaseButton-primaryFormSubmit"]:hover {
+  background-color: #FFFFFF !important;
+}
+
+[data-testid="stBaseButton-primary"] p,
+[data-testid="stBaseButton-primaryFormSubmit"] p {
+  color: var(--rubber) !important;
+}
+
+button:focus-visible,
+input:focus-visible,
+[role="combobox"]:focus-visible {
+  outline: 2px solid var(--chalk) !important;
+  outline-offset: 2px;
 }
 
 /* =========================================================
-   INPUTS & TEXT ELEMENTS
+   LOGIN
 ========================================================= */
 
-input,
-textarea,
-p,
-li,
-code,
-[data-testid="stSelectbox"] > div > div,
-[data-baseweb="select"] > div,
-[data-baseweb="popover"] ul,
-[data-baseweb="menu"] {
-  border-radius: 0 !important;
-  font-family: 'AdobeClean', sans-serif !important;
+.st-key-login {
+  max-width: 440px;
+  margin: 12vh auto 0;
 }
 
 /* =========================================================
-   METRICS
+   EMPTY STATE
 ========================================================= */
 
-[data-testid="stMetric"] {
-  background-color: #181D2A;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 1rem 1.2rem;
-  border-radius: 0;
+.empty-state {
+  background: var(--rubber-raised);
+  border-radius: 8px;
+  padding: 2rem 2.25rem;
+  max-width: 640px;
 }
 
-[data-testid="stMetric"] div {
+.empty-state h2 {
+  font-size: 1.5rem !important;
+  padding: 0 0 0.75rem !important;
+}
+
+.empty-state ol {
+  padding-left: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.empty-state li {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  margin-bottom: 0.35rem;
+}
+
+.empty-state li::marker {
+  color: var(--chalk-muted);
+}
+
+.empty-state > p {
+  color: var(--chalk-muted);
+  margin: 0;
+}
+
+/* =========================================================
+   COACH NOTE
+========================================================= */
+
+.coach-note {
+  border-left: 3px solid var(--chalk);
+  background: var(--rubber-raised);
+  border-radius: 0 6px 6px 0;
+  padding: 0.85rem 1.1rem;
+  margin-bottom: 1.5rem;
+  max-width: 65ch;
+}
+
+.coach-note p {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+.coach-note .coach-name {
+  color: var(--chalk-muted);
+  font-size: 0.875rem;
+  font-weight: 700;
+  margin-bottom: 0.15rem;
+}
+
+/* =========================================================
+   SCOREBOARD
+   The one loud element: readable from across the room.
+========================================================= */
+
+.st-key-scoreboard {
+  container-type: inline-size;
+}
+
+.scoreboard {
+  background: var(--rubber-raised);
+  border-radius: 8px;
+  padding: 1.25rem 1.5rem 1.25rem;
+}
+
+.sb-head {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: baseline;
+  gap: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--line);
 }
 
-[data-testid="stMetricValue"] {
-  font-size: 1.5rem !important;
+.sb-head h2 {
+  font-size: 1.2rem !important;
+  font-weight: 700 !important;
+  padding: 0 !important;
+  margin: 0;
+}
+
+.sb-head p {
+  margin: 0;
+  color: var(--chalk-muted);
+  font-size: 1.05rem;
+  white-space: nowrap;
+}
+
+.sb-count {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.6rem;
+  margin: 0.75rem 0 0.5rem;
+}
+
+.sb-number {
+  display: inline-block;
+  font-family: var(--font-count);
+  font-weight: 800;
+  font-size: clamp(5.5rem, 40cqi, 11rem);
+  line-height: 0.9;
+  font-variant-numeric: tabular-nums;
+  color: var(--chalk);
+}
+
+.sb-of {
+  font-family: var(--font-count);
+  font-weight: 700;
+  font-size: clamp(1.5rem, 9cqi, 2.25rem);
+  color: var(--chalk-muted);
+}
+
+.pulse-0 { animation: rep-land-0 0.4s ease-out; }
+.pulse-1 { animation: rep-land-1 0.4s ease-out; }
+
+@keyframes rep-land-0 {
+  from { transform: scale(1.12); color: var(--good); }
+  to   { transform: scale(1);    color: var(--chalk); }
+}
+
+@keyframes rep-land-1 {
+  from { transform: scale(1.12); color: var(--good); }
+  to   { transform: scale(1);    color: var(--chalk); }
+}
+
+/* Set plates: one disc per set, with the bar hole in the middle */
+
+.sb-plates {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.sb-plate {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  box-sizing: border-box;
+}
+
+.plate-done {
+  background: radial-gradient(circle, var(--rubber-raised) 0 17%, var(--plate-green) 19%);
+}
+
+.plate-current {
+  background: radial-gradient(circle, var(--rubber-raised) 0 17%, var(--plate-blue) 19%);
+}
+
+.plate-upcoming {
+  border: 2px solid var(--ring);
+  background: radial-gradient(circle, var(--ring) 0 14%, transparent 16%);
+}
+
+/* Form readout */
+
+.sb-metrics {
+  margin: 0;
+}
+
+.sb-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.6rem 0;
+  border-top: 1px solid var(--line);
+}
+
+.sb-row dt {
+  color: var(--chalk-muted);
+  font-weight: 400;
+}
+
+.sb-row dd {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.sb-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sb-dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: var(--ring);
+  flex: none;
+}
+
+.tone-good { color: var(--good); }
+.tone-warn { color: var(--warn); }
+.tone-bad  { color: var(--bad); }
+.tone-idle { color: var(--chalk-muted); }
+
+.tone-good .sb-dot { background: var(--good); }
+.tone-warn .sb-dot { background: var(--warn); }
+.tone-bad  .sb-dot { background: var(--bad); }
+
+.sb-note {
+  margin: 0.75rem 0 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--line);
+  color: var(--chalk-muted);
+  line-height: 1.5;
+}
+
+.sb-note.tone-good { color: var(--good); }
+.sb-note.tone-warn { color: var(--warn); }
+
+/* =========================================================
+   HISTORY
+========================================================= */
+
+.block-container h3 {
+  font-size: 1.25rem !important;
+  margin-top: 2.5rem;
+}
+
+.history-empty {
+  color: var(--chalk-muted);
+}
+
+[data-testid="stTable"] table {
+  font-variant-numeric: tabular-nums;
+}
+
+[data-testid="stTable"] th {
+  color: var(--chalk-muted) !important;
   font-weight: 400 !important;
 }
 
-[data-testid="stMetricLabel"] {
-  font-size: 15px !important;
-  opacity: 0.6;
-}
-
-[data-testid="stMetric"] div label p {
-  font-size: 16px !important;
+[data-testid="stTable"] th:last-child,
+[data-testid="stTable"] td:last-child {
+  text-align: right !important;
 }
 
 /* =========================================================
-   CONTAINERS / CARDS
+   SMALL SCREENS
 ========================================================= */
 
-.stContainer,
-.stExpander,
-.stTabs,
-.stColumns,
-.stPopover,
-.stAlertContainer,
-.stStatusContainer,
-.stMetric,
-.stTable,
-.stDataFrame,
-.stForm,
-.stSelectbox,
-[data-baseweb="select"] > div,
-[data-testid="stForm"],
-[data-testid="stMetric"],
-[data-testid="stNumberInputContainer"],
-[data-testid="stDataFrameColumnMenu"],
-[data-testid="stHeadingWithActionElements"],
-[data-testid="stCaptionContainer"] p,
-[data-testid="stAlertContentInfo"] p,
-[data-testid="stSidebarNavLink"],
-[data-testid="stMarkdownContainer"] h3,
-[data-baseweb="popover"],
-[data-baseweb="menu"],
-div[role="menu"],
-div[role="menuitem"] {
-  border-radius: 0 !important;
-  font-family: 'AdobeClean', sans-serif !important;
+@media (max-width: 640px) {
+  .block-container {
+    padding: 1.5rem 1rem 3rem !important;
+  }
+
+  h1 {
+    font-size: 1.75rem !important;
+  }
+
+  [data-testid="stColumn"]:has(.st-key-scoreboard) {
+    order: -1;
+  }
+
+  .empty-state {
+    padding: 1.5rem 1.25rem;
+  }
 }
 
-/* =========================================================
-   DATAFRAME FIX
-========================================================= */
-
-.stDataFrame,
-.stDataFrame div,
-.stDataFrameGlideDataEditor {
-  border-radius: 0 !important;
-  font-family: 'AdobeClean', sans-serif !important;
-}
-
-/* =========================================================
-   INTERACTIVE ELEMENTS
-========================================================= */
-
-.stTextInput,
-.stTextArea,
-.stNumberInput,
-.stSlider,
-.stMultiselect,
-.stRadio,
-.stCheckbox,
-.stToggle,
-.stFileUploader,
-.stColorPicker,
-.stDateInput,
-.stTimeInput,
-.stCameraInput,
-[data-testid="stTextInput"] > div,
-[data-testid="stButton"] button,
-[data-testid="stBaseButton-secondaryFormSubmit"],
-[data-testid="stStatusWidget"] {
-  border-radius: 0 !important;
-  font-family: 'AdobeClean', sans-serif !important;
-}
-
-/* =========================================================
-   MARKDOWN
-========================================================= */
-
-[data-testid="stMarkdownContainer"] strong {
-  font-family: 'AdobeClean', sans-serif !important;
-}
-
-/* =========================================================
-   FORM
-========================================================= */
-
-.stForm {
-  margin-top: 2rem !important;
-  padding: 1.5rem 1rem !important;
-  background-color: #181D2A !important;
-  color: #fff;
+@media (prefers-reduced-motion: reduce) {
+  .pulse-0,
+  .pulse-1 {
+    animation: none;
+  }
 }

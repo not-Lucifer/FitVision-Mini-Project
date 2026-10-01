@@ -5,7 +5,10 @@ from services.persistence.exercise_repository import add_exercise
 
 
 def sync_metrics_update(context):
-    if not context or not hasattr(context, "state") or not context.state.playing:
+    camera_live = bool(context and hasattr(context, "state") and context.state.playing)
+    st.session_state.camera_live = camera_live
+
+    if not camera_live:
         return
     
     processor = getattr(context, "video_processor", None)
@@ -23,7 +26,9 @@ def sync_metrics_update(context):
 
     if not latest_metrics:
         return
-    
+
+    st.session_state.pose_detected = latest_metrics.get("pose_detected", True)
+
     reps = latest_metrics.get("reps", 0)
 
     if reps is None:
