@@ -12,11 +12,25 @@ from services.vision.exercise_video_processor import VideoProcessorClass, warm_u
 from services.tracking.metrics import sync_metrics_update
 from services.persistence.exercise_repository import get_users_exercises
 from groq import Groq
+from streamlit.errors import StreamlitSecretNotFoundError
 from services.coaching.llm import LLMCoach
 from services.coaching.tts import TextToSpeech
 from services.coaching.voice_pipeline import VoicePipeline, autoplay_audio
 
-  
+
+def get_setting(name):
+    """Read a setting from the environment, falling back to Streamlit secrets."""
+    value = os.environ.get(name)
+    if value:
+        return value
+    try:
+        if name in st.secrets:
+            return st.secrets[name]
+    except StreamlitSecretNotFoundError:
+        pass
+    return ""
+
+
 def get_ice_servers():
     """Build ICE servers with optional authenticated deployment relay."""
     ice_servers = [
@@ -31,17 +45,9 @@ def get_ice_servers():
         },
     ]
 
-    def setting(name):
-        value = os.environ.get(name)
-        if value:
-            return value
-        if hasattr(st, "secrets") and name in st.secrets:
-            return st.secrets[name]
-        return ""
-
-    turn_urls = setting("TURN_URLS") or setting("TURN_URL")
-    turn_username = setting("TURN_USERNAME")
-    turn_password = setting("TURN_PASSWORD")
+    turn_urls = get_setting("TURN_URLS") or get_setting("TURN_URL")
+    turn_username = get_setting("TURN_USERNAME")
+    turn_password = get_setting("TURN_PASSWORD")
 
     if turn_urls and turn_username and turn_password:
         ice_servers.append({
@@ -71,6 +77,54 @@ def render_live_workout():
     inject_webrtc_styles()
 
 
+@st.fragment(run_every="500ms")
+def render_workout_progress():
+    exercise = st.session_state.get("exercise_type")
+    total_reps = st.session_state.get("reps")
+    current_set_reps = st.session_state.get("current_set_reps")
+    reps_per_set = st.session_state.get("reps_per_set")
+    sets_completed = st.session_state.get("sets_completed")
+    target_sets = st.session_state.get("target_sets")
+
+    st.subheader("Progress")
+
+    st.metric("Total Reps", f"{total_reps}")
+    st.metric("Current Set Reps", f"{current_set_reps} / {reps_per_set}")
+    st.metric("Sets Completed", f"{sets_completed} / {target_sets}")
+
+    st.divider()
+
+    if exercise == "Squats":
+        st.subheader("Squat Metrics")
+        st.metric("Knee Angle", f"{st.session_state.knee_angle}°")
+        st.metric("Back Angle", f"{st.session_state.back_angle}°")
+        st.metric("Depth Status", st.session_state.depth_status)
+
+    elif exercise == "Push-ups":
+        st.subheader("Push-up Metrics")
+        st.metric("Elbow Angle", f"{st.session_state.elbow_angle}°")
+        st.metric("Body Alignment", st.session_state.body_alignment)
+        st.metric("Hip Position", st.session_state.hip_status)
+
+    elif exercise == "Biceps Curls (Dumbbell)":
+        st.subheader("Curl Metrics")
+        st.metric("Elbow Angle", f"{st.session_state.elbow_angle}°")
+        st.metric("Shoulder Stability", st.session_state.shoulder_status)
+        st.metric("Swing Detection", st.session_state.swing_status)
+
+    elif exercise == "Shoulder Press":
+        st.subheader("Shoulder Press Metrics")
+        st.metric("Elbow Angle", f"{st.session_state.elbow_angle}°")
+        st.metric("Arm Extension", st.session_state.extension_status)
+        st.metric("Back Arch", st.session_state.back_arch_status)
+
+    elif exercise == "Lunges":
+        st.subheader("Lunge Metrics")
+        st.metric("Front Knee Angle", f"{st.session_state.front_knee_angle}°")
+        st.metric("Torso Angle", f"{st.session_state.torso_angle}°")
+        st.metric("Balance Status", st.session_state.balance_status)
+
+
 def main():
     st.set_page_config(
         page_icon="🏋️‍♀️",
@@ -91,10 +145,7 @@ def main():
 
     if "voice_pipeline" not in st.session_state:
         try:
-            api_key = os.environ.get("GROQ_API_KEY", "")
-
-            if not api_key and hasattr(st, "secrets") and "GROQ_API_KEY" in st.secrets:
-                api_key = st.secrets["GROQ_API_KEY"]
+            api_key = get_setting("GROQ_API_KEY")
 
             if not api_key:
                 st.session_state.voice_pipeline = None
@@ -178,56 +229,14 @@ def main():
         if workout_started:
             st.divider()
 
-            exercise = st.session_state.get("exercise_type")
-            total_reps = st.session_state.get("reps")
-            current_set_reps = st.session_state.get("current_set_reps")
-            reps_per_set = st.session_state.get("reps_per_set")
-            sets_completed = st.session_state.get("sets_completed")
-            target_sets = st.session_state.get("target_sets")
-
-            st.subheader("Progress")
-
-            st.metric("Total Reps", f"{total_reps}")
-            st.metric("Current Set Reps", f"{current_set_reps} / {reps_per_set}")
-            st.metric("Sets Completed", f"{sets_completed} / {target_sets}")
-
-            st.divider()
-
-            if exercise == "Squats":
-                st.subheader("Squat Metrics")
-                st.metric("Knee Angle", f"{st.session_state.knee_angle}°")
-                st.metric("Back Angle", f"{st.session_state.back_angle}°")
-                st.metric("Depth Status", st.session_state.depth_status)
-
-            elif exercise == "Push-ups":
-                st.subheader("Push-up Metrics")
-                st.metric("Elbow Angle", f"{st.session_state.elbow_angle}°")
-                st.metric("Body Alignment", st.session_state.body_alignment)
-                st.metric("Hip Position", st.session_state.hip_status)
-
-            elif exercise == "Biceps Curls (Dumbbell)":
-                st.subheader("Curl Metrics")
-                st.metric("Elbow Angle", f"{st.session_state.elbow_angle}°")
-                st.metric("Shoulder Stability", st.session_state.shoulder_status)
-                st.metric("Swing Detection", st.session_state.swing_status)
-
-            elif exercise == "Shoulder Press":
-                st.subheader("Shoulder Press Metrics")
-                st.metric("Elbow Angle", f"{st.session_state.elbow_angle}°")
-                st.metric("Arm Extension", st.session_state.extension_status)
-                st.metric("Back Arch", st.session_state.back_arch_status)
-
-            elif exercise == "Lunges":
-                st.subheader("Lunge Metrics")
-                st.metric("Front Knee Angle", f"{st.session_state.front_knee_angle}°")
-                st.metric("Torso Angle", f"{st.session_state.torso_angle}°")
-                st.metric("Balance Status", st.session_state.balance_status)
+            render_workout_progress()
 
     st.title("AI Real-time GYM Coach")
     st.markdown("#### Real-time pose detection with proactive AI voice coaching")
  
-    if st.session_state.get("audio_to_play"):
-        autoplay_audio(st.session_state.audio_to_play)
+    audio_to_play = st.session_state.pop("audio_to_play", None)
+    if audio_to_play:
+        autoplay_audio(audio_to_play)
 
     if st.session_state.get("coach_feedback"):
         st.markdown("")

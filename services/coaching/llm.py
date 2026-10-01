@@ -44,7 +44,6 @@ class LLMCoach:
 
         models_to_try = [self.preferred_model, *[m for m in self.FALLBACK_MODELS if m != self.preferred_model]]
 
-        last_error = None
         for model_name in models_to_try:
             try:
                 response = self.client.chat.completions.create(
@@ -58,8 +57,7 @@ class LLMCoach:
                 if text:
                     self.history.append({"role": "assistant", "content": text})
                     return text
-            except Exception as exc:  # pragma: no cover - defensive fallback for API/model issues
-                last_error = exc
+            except Exception:  # pragma: no cover - defensive fallback for API/model issues
                 continue
 
         text = self._fallback_text(event, issue)

@@ -14,6 +14,8 @@ def render_login_wall():
         submit_button = st.form_submit_button("Start Session", width="stretch")
 
     if submit_button:
+        username = username.strip()
+
         if not username:
             st.error("Name cannot be empty.")
             return False
