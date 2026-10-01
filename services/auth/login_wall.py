@@ -7,9 +7,10 @@ def render_login_wall():
         return True
     
     with st.container(key="login"):
-        st.title("🏋️‍♂️ AI Real-time GYM Coach")
         st.markdown(
-            '<p class="app-subtitle">Enter your name to load your workout history. '
+            '<h1 class="login-title">Apna AI Coach</h1>'
+            '<p class="login-lede">Counts your reps and checks your form through your camera.</p>'
+            '<p class="login-help">Enter your name to load your workout history. '
             'A new name starts a fresh history.</p>',
             unsafe_allow_html=True,
         )

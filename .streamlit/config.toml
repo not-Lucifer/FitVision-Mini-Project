@@ -1,20 +1,15 @@
 [theme]
-base = "dark"
-primaryColor = "#ECEAE4"
-backgroundColor = "#23262A"
-secondaryBackgroundColor = "#2E3236"
-textColor = "#ECEAE4"
-borderColor = "#43484E"
-font = "AdobeClean, 'Segoe UI', sans-serif"
-headingFont = "AdobeClean, 'Segoe UI', sans-serif"
+base = "light"
+primaryColor = "#17153A"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#EEF0F6"
+textColor = "#17153A"
+borderColor = "#DADDE8"
+font = "'Instrument Sans', 'Segoe UI', sans-serif"
+headingFont = "Unbounded, 'Segoe UI', sans-serif"
 headingFontWeights = 700
-baseRadius = "6px"
-buttonRadius = "6px"
-greenColor = "#5CC98A"
-yellowColor = "#F2B705"
-redColor = "#FF7A7A"
-blueColor = "#4C82DB"
-
-[theme.sidebar]
-backgroundColor = "#1C1F22"
-secondaryBackgroundColor = "#2A2E32"
+baseRadius = "12px"
+buttonRadius = "999px"
+showWidgetBorder = true
+redColor = "#E5322D"
+blueColor = "#2F6BFF"

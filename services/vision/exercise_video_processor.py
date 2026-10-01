@@ -14,6 +14,16 @@ from detectors.biceps_curl import BicepsCurlDetector
 from detectors.shoulder_press import ShoulderPressDetector
 from detectors.lunges import LungesDetector
 from services.config.workout_config import POSE_CONNECTIONS
+from services.ui.scoreboard import exercise_colors
+
+SKELETON_COLOR = (255, 255, 255)
+LABEL_COLOR = (255, 255, 255)
+LABEL_BACKGROUND_COLOR = (58, 21, 23)  # ink #17153A in BGR
+
+
+def _label(status):
+    text = str(status)
+    return text[:1].upper() + text[1:].lower()
 
 
 @st.cache_data(show_spinner="Preparing pose detection...")
@@ -75,8 +85,28 @@ class VideoProcessorClass(VideoProcessorBase):
         with self._lock:
             return self._exercise_type
         
+    def _joint_color(self):
+        fill = exercise_colors(self.get_exercise())[0].lstrip("#")
+        r, g, b = (int(fill[i:i + 2], 16) for i in (0, 2, 4))
+        return (b, g, r)
+
+    def _put_label(self, img, text, org):
+        """Draw text on a solid ink tag so it stays readable on any background."""
+        (text_w, text_h), baseline = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, 0.8, 2)
+        x, y = org
+        pad = 10
+        cv2.rectangle(
+            img,
+            (x - pad, y - text_h - pad),
+            (x + text_w + pad, y + baseline + pad // 2),
+            LABEL_BACKGROUND_COLOR,
+            -1,
+        )
+        cv2.putText(img, text, org, cv2.FONT_HERSHEY_SIMPLEX, 0.8, LABEL_COLOR, 2, cv2.LINE_AA)
+
     def _draw_skeleton(self, img, landmarks):
         h, w = img.shape[:2]
+        joint_color = self._joint_color()
 
         for start_idx, end_idx in POSE_CONNECTIONS:
             p1 = landmarks[start_idx]
@@ -87,8 +117,9 @@ class VideoProcessorClass(VideoProcessorBase):
                     img,
                     (int(p1.x * w), int(p1.y * h)),
                     (int(p2.x * w), int(p2.y * h)),
-                    (0, 255, 0),
-                    8
+                    SKELETON_COLOR,
+                    4,
+                    cv2.LINE_AA,
                 )
         
         for lm in landmarks:
@@ -96,33 +127,16 @@ class VideoProcessorClass(VideoProcessorBase):
                 cv2.circle(
                     img, 
                     (int(lm.x * w), int(lm.y * h)),
-                    8,
-                    (255, 0, 0),
-                    -1
+                    7,
+                    joint_color,
+                    -1,
+                    cv2.LINE_AA,
                 )
             
     def _draw_no_pose_warnings(self, img):
-        cv2.putText(
-            img,
-            "NO POSE DETECTED",
-            (30, 50),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            1,
-            (0, 255, 0),
-            2,
-            cv2.LINE_AA,
-        )
+        self._put_label(img, "No pose detected", (30, 50))
 
-        cv2.putText(
-            img,
-            "PLEASE FACE THE CAMERA",
-            (30, 100),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            1,
-            (0, 255, 0),
-            2,
-            cv2.LINE_AA,
-        )
+        self._put_label(img, "Step back and face the camera", (30, 95))
 
     def _draw_overlays(self, img, metrics, ex_type):
         if ex_type == "Squats":
@@ -140,67 +154,27 @@ class VideoProcessorClass(VideoProcessorBase):
     def _draw_squats_overlays(self, img, metrics):
         h, _ = img.shape[:2]
 
-        cv2.putText(
-            img,
-            f"DEPTH: {metrics['depth_status']}",
-            (20, h - 20),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            1,
-            (0, 255, 0),
-            2,
-        )
+        self._put_label(img, f"Depth: {_label(metrics['depth_status'])}", (24, h - 24))
     
     def _draw_pushup_overlays(self, img, metrics):
         h, _ = img.shape[:2]
 
-        cv2.putText(
-            img,
-            f"BODY: {metrics['body_alignment']} | HIP: {metrics['hip_status']}",
-            (20, h - 20),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            1,
-            (0, 255, 0),
-            2,
-        )
+        self._put_label(img, f"Body: {_label(metrics['body_alignment'])}   Hips: {_label(metrics['hip_status'])}", (24, h - 24))
 
     def _draw_curl_overlays(self, img, metrics):
         h, _ = img.shape[:2]
 
-        cv2.putText(
-            img,
-            f"SWING: {metrics['swing_status']}",
-            (20, h - 20),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            1,
-            (0, 255, 0),
-            2,
-        )
+        self._put_label(img, f"Swing: {_label(metrics['swing_status'])}", (24, h - 24))
 
     def _draw_press_overlays(self, img, metrics):
         h, _ = img.shape[:2]
 
-        cv2.putText(
-            img,
-            f"EXT: {metrics['extension_status']} | BACK: {metrics['back_arch_status']}",
-            (20, h - 20),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            1,
-            (0, 255, 0),
-            2,
-        )
+        self._put_label(img, f"Arms: {_label(metrics['extension_status'])}   Back: {_label(metrics['back_arch_status'])}", (24, h - 24))
 
     def _draw_lunge_overlays(self, img, metrics):
         h, _ = img.shape[:2]
 
-        cv2.putText(
-            img,
-            f"BALANCE: {metrics['balance_status']}",
-            (20, h - 20),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            1,
-            (0, 255, 0),
-            2,
-        )
+        self._put_label(img, f"Balance: {_label(metrics['balance_status'])}", (24, h - 24))
 
     def recv(self, frame):
         image = np.asarray(
